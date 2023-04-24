@@ -1,0 +1,35 @@
+// Define pins for the traffic lights
+int redPin = 10;
+int yellowPin = 9;
+int greenPin = 8;
+
+void setup() {
+  // Set the traffic light pins as outputs
+  pinMode(redPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+}
+
+void loop() {
+  // Turn on the green light for 2 seconds
+  digitalWrite(greenPin, HIGH);
+  delay(2000);
+
+  // Turn off the green light and turn on the yellow light for 2 seconds
+  digitalWrite(greenPin, LOW);
+  digitalWrite(yellowPin, HIGH);
+  delay(2000);
+
+  // Turn off the yellow light and turn on the red light for 2 seconds
+  digitalWrite(yellowPin, LOW);
+  digitalWrite(redPin, HIGH);
+  delay(2000);
+
+  // Turn off all lights
+  digitalWrite(greenPin, LOW);
+  digitalWrite(yellowPin, LOW);
+  digitalWrite(redPin, LOW);
+
+  // Delay before starting the loop again
+  delay(100);
+}
