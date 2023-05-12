@@ -1,35 +1,90 @@
-// Define pins for the traffic lights
-int redPin = 10;
-int yellowPin = 9;
-int greenPin = 8;
+// Variable used to store the state of the Walk Push Button
+int  WalkRequest = 0;  
+const  int WalkButton = 2;
+const int RedPedLED = 6;
+const int GreenPedLED = 7;
 
+//  Setup for Traffic Light #1 
+const int Red1LED =  8;
+const int Yellow1LED = 9;
+const int Green1LED = 10;
+
+//  Setup for Traffic Light #2
+const int Red2LED = 11;
+const int Yellow2LED  = 12;
+const int Green2LED = 13;
+
+// Setup for watching button
+volatile  int buttonState = 0;  // variable for watching the pushbutton status.
+
+// Sets all LED's and the button as OUTPUT
 void setup() {
-  // Set the traffic light pins as outputs
-  pinMode(redPin, OUTPUT);
-  pinMode(yellowPin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
+  pinMode(RedPedLED, OUTPUT);  
+  pinMode(GreenPedLED, OUTPUT);
+  pinMode(Red1LED,  OUTPUT);
+  pinMode(Yellow1LED, OUTPUT);
+  pinMode(Green1LED, OUTPUT);
+  pinMode(Red2LED, OUTPUT);
+  pinMode(Yellow2LED, OUTPUT);
+  pinMode(Green2LED,  OUTPUT);
+  pinMode(WalkButton, INPUT);  
+
+  attachInterrupt(0, pin_ISR, CHANGE);  //  Watches in the background for a  button press
+
+  // Set Initial  state of all red LED's to HIGH
+  digitalWrite (Red1LED, HIGH);
+  digitalWrite  (Red2LED, HIGH);
+  digitalWrite (RedPedLED, HIGH);
 }
 
-void loop() {
-  // Turn on the green light for 2 seconds
-  digitalWrite(greenPin, HIGH);
-  delay(2000);
+void  loop() {
 
-  // Turn off the green light and turn on the yellow light for 2 seconds
-  digitalWrite(greenPin, LOW);
-  digitalWrite(yellowPin, HIGH);
-  delay(2000);
+  // Traffic light #1 Timing
+  delay(2500);  //  2.5 Seconds of Red
+  digitalWrite(Red1LED, LOW);  //  Sets Red1 OFF Green ON
+  digitalWrite(Green1LED, HIGH);
+  delay(7000);  // 7 Seconds of Green
+  digitalWrite(Green1LED, LOW);  //  Sets Green1 OFF  Yellow ON
+  digitalWrite(Yellow1LED, HIGH);
+  delay(3500);  // 3.5 Seconds  of Yellow
+  digitalWrite(Yellow1LED, LOW);  //  Sets Yellow1 OFF Red ON
+  digitalWrite(Red1LED,  HIGH);
 
-  // Turn off the yellow light and turn on the red light for 2 seconds
-  digitalWrite(yellowPin, LOW);
-  digitalWrite(redPin, HIGH);
-  delay(2000);
+  if (WalkRequest == 1) {  //  If the button has been pressed
+    WalkCycle();  //  Exit main loop and run WalkCycle
+  }
 
-  // Turn off all lights
-  digitalWrite(greenPin, LOW);
-  digitalWrite(yellowPin, LOW);
-  digitalWrite(redPin, LOW);
+  // Traffic light #2 Timing
+  delay(2500);  //  2.5 Seconds of Red
+  digitalWrite(Red2LED,  LOW); digitalWrite(Green2LED, HIGH);  //  Sets Red2 OFF Green ON
+   delay(7000);  // 7 Seconds of Green
+  digitalWrite(Green2LED, LOW); digitalWrite(Yellow2LED,  HIGH);  //  Sets Green2 OFF Yellow ON
+  delay(3500);  // 3.5 Seconds of Yellow
+  digitalWrite(Yellow2LED, LOW); digitalWrite(Red2LED, HIGH);  //  Sets Yellow2  OFF Red ON
 
-  // Delay before starting the loop again
-  delay(100);
+  if (WalkRequest == 1) {  //  If the button has been pressed
+    WalkCycle();  //  Exit main loop and run WalkCycle 
+  }
+}
+void  WalkCycle() {
+  delay(2500);  //  2.5 Second delay before "WALK" begins
+  digitalWrite (GreenPedLED, HIGH); digitalWrite (RedPedLED, LOW);  // Turn on Green  Pedestrian Light
+  delay (5000);  // 15 Second delay to allow crossing street
+  digitalWrite (GreenPedLED, LOW); digitalWrite(WalkButton, LOW);  // Turn off Green  Pedestrian Light
+  delay(250);
+  for (int x = 0; x < 10; x++) {  // Flash Green Ped LED 10 times
+    digitalWrite(GreenPedLED, HIGH);
+    delay(750);
+    digitalWrite(GreenPedLED,  LOW);
+    delay(259);
+  }
+  digitalWrite(RedPedLED, HIGH);
+  WalkRequest  = 0; //  Reset Push Button
+  asm volatile ("  jmp 0");  // back to the top
+}
+
+//This is part of the button watching code
+void  pin_ISR() {
+  buttonState = digitalRead(WalkButton);
+  (WalkRequest = 1);  //  This means the walk button has been pressed
 }
